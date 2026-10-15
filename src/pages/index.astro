@@ -1,0 +1,1265 @@
+
+---
+const title = "Crypto Profit Calculator — Calculate Gains, Losses & ROI";
+const description =
+  "Calculate crypto profit or loss, trading fees, ROI, break-even price, and hypothetical future returns with this free crypto profit calculator.";
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1713" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="index,follow" />
+    <title>{title}</title>
+
+    <!-- Replace with your actual domain before publishing -->
+    <link rel="canonical" href="https://YOUR-DOMAIN.com/" />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CoinGain" />
+    <meta name="twitter:card" content="summary" />
+
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b1713;
+        --panel: #11221b;
+        --panel2: #172b22;
+        --border: #294136;
+        --text: #f1f7f1;
+        --muted: #9caf9f;
+        --green: #9af2b8;
+        --red: #ff9e9e;
+        --radius: 18px;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { scroll-behavior: smooth; }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(ellipse at 80% 0%, #193c2b 0, transparent 35%),
+          var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+          BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+      }
+
+      button, input, select { font: inherit; }
+      button { cursor: pointer; }
+      button:disabled { cursor: not-allowed; opacity: .5; }
+      a { color: var(--green); }
+
+      .wrap {
+        width: min(1100px, calc(100% - 36px));
+        margin-inline: auto;
+      }
+
+      header {
+        border-bottom: 1px solid #263a30;
+        background: #0b1713eF;
+      }
+
+      .nav {
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .brand {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        color: var(--text);
+        text-decoration: none;
+        font-size: 19px;
+        font-weight: 850;
+        letter-spacing: -.7px;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: var(--green);
+        color: #10251a;
+        font-weight: 950;
+      }
+
+      .nav-note { color: var(--muted); font-size: 13px; }
+
+      .hero {
+        padding: 65px 0 35px;
+        max-width: 760px;
+        margin: auto;
+        text-align: center;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        color: var(--green);
+        background: #183729;
+        border: 1px solid #315a41;
+        padding: 6px 12px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: .7px;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(36px, 6vw, 64px);
+        line-height: 1.06;
+        letter-spacing: -2.7px;
+        margin: 23px 0 17px;
+      }
+
+      h1 span { color: var(--green); }
+
+      .hero p {
+        color: var(--muted);
+        max-width: 610px;
+        margin: auto;
+        font-size: 16px;
+      }
+
+      .trust-row {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px 20px;
+        margin-top: 24px;
+        font-size: 12px;
+        color: #bfd0c3;
+      }
+
+      .trust-row span::before {
+        content: "✓";
+        color: var(--green);
+        margin-right: 6px;
+        font-weight: 900;
+      }
+
+      .calculator {
+        display: grid;
+        grid-template-columns: 1fr .85fr;
+        gap: 18px;
+        align-items: start;
+        margin: 22px auto 65px;
+        max-width: 990px;
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: #102019ed;
+        overflow: hidden;
+        min-width: 0;
+      }
+
+      .card-head {
+        padding: 22px 24px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .card-head h2 {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: -.4px;
+      }
+
+      .card-head p {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 5px 0 0;
+      }
+
+      .card-body { padding: 23px 24px; }
+      .field { margin-bottom: 19px; }
+
+      .label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #dce9df;
+      }
+
+      .hint { font-size: 11px; color: var(--muted); }
+
+      .input-wrap { position: relative; }
+
+      .prefix {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+        font-size: 14px;
+        pointer-events: none;
+      }
+
+      input, select {
+        width: 100%;
+        min-width: 0;
+        min-height: 48px;
+        border: 1px solid #365143;
+        border-radius: 10px;
+        padding: 11px 13px;
+        background: #0b1712;
+        color: var(--text);
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+      }
+
+      input.has-prefix { padding-left: 31px; }
+
+      input:focus, select:focus {
+        border-color: var(--green);
+        box-shadow: 0 0 0 3px #9af2b81b;
+      }
+
+      input[aria-invalid="true"] { border-color: var(--red); }
+
+      .two-col, .select-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 13px;
+      }
+
+      .subsection {
+        border-top: 1px solid var(--border);
+        padding-top: 20px;
+        margin-top: 8px;
+      }
+
+      .subsection-title {
+        font-size: 12px;
+        color: var(--green);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        margin-bottom: 15px;
+      }
+
+      .results {
+        background: linear-gradient(155deg, #183b29, #102019 62%);
+      }
+
+      .results .card-head { border-bottom-color: #345541; }
+
+      .result-label {
+        font-size: 12px;
+        color: #c0d2c5;
+        font-weight: 650;
+      }
+
+      .profit-number {
+        font-size: clamp(32px, 4vw, 43px);
+        line-height: 1.2;
+        font-weight: 850;
+        letter-spacing: -1.7px;
+        margin: 9px 0 4px;
+        overflow-wrap: anywhere;
+      }
+
+      .positive { color: var(--green); }
+      .negative { color: var(--red); }
+
+      .roi-line { font-size: 13px; color: #c3d8c9; }
+
+      .roi-pill {
+        display: inline-flex;
+        border: 1px solid #4b7658;
+        background: #1c402c;
+        padding: 4px 9px;
+        border-radius: 8px;
+        font-size: 12px;
+        margin-top: 11px;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 23px;
+      }
+
+      .metric {
+        background: #0c1a13a6;
+        border: 1px solid #34513d;
+        border-radius: 12px;
+        padding: 14px;
+        min-width: 0;
+      }
+
+      .metric span {
+        display: block;
+        color: #a9c0af;
+        font-size: 11px;
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 17px;
+        margin-top: 5px;
+        overflow-wrap: anywhere;
+      }
+
+      .result-divider {
+        border-top: 1px solid #34513d;
+        margin: 22px 0 16px;
+      }
+
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 8px 0;
+        font-size: 13px;
+      }
+
+      .detail-row span { color: #afc5b5; }
+
+      .detail-row strong {
+        text-align: right;
+        overflow-wrap: anywhere;
+      }
+
+      .btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 13px;
+        font-weight: 800;
+        transition: transform .15s, background .15s;
+      }
+
+      .btn:hover:not(:disabled) { transform: translateY(-1px); }
+      .btn-primary { background: var(--green); color: #10251a; }
+      .btn-secondary {
+        background: #203c2b;
+        border-color: #42684b;
+        color: var(--text);
+      }
+      .btn-ghost {
+        background: transparent;
+        border-color: #3b5544;
+        color: var(--text);
+      }
+
+      .btn-full { width: 100%; margin-top: 17px; }
+
+      .button-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin-top: 10px;
+      }
+
+      .notice {
+        color: #91a99a;
+        font-size: 11px;
+        margin-top: 15px;
+      }
+
+      .scenario { margin-top: 18px; }
+
+      .scenario h3 { font-size: 15px; margin: 0 0 5px; }
+
+      .scenario p {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 0 0 16px;
+      }
+
+      .scenario-result {
+        background: #0c1a13;
+        border: 1px solid #365440;
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 13px;
+      }
+
+      .scenario-result .big {
+        font-size: 24px;
+        font-weight: 850;
+        letter-spacing: -.7px;
+        margin: 4px 0;
+        overflow-wrap: anywhere;
+      }
+
+      .scenario-result small { color: var(--muted); font-size: 11px; }
+
+      .section { padding: 20px 0 64px; }
+
+      .section-heading {
+        max-width: 650px;
+        margin: 0 auto 28px;
+        text-align: center;
+      }
+
+      .section-heading h2 {
+        font-size: clamp(26px, 4vw, 36px);
+        letter-spacing: -1.2px;
+        margin: 0 0 9px;
+      }
+
+      .section-heading p { color: var(--muted); margin: 0; font-size: 14px; }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+
+      .feature {
+        border: 1px solid var(--border);
+        background: #102019;
+        border-radius: 15px;
+        padding: 21px;
+      }
+
+      .feature-icon {
+        display: grid;
+        place-items: center;
+        width: 39px;
+        height: 39px;
+        border-radius: 11px;
+        background: #1c3d2b;
+        color: var(--green);
+        font-size: 18px;
+        margin-bottom: 14px;
+      }
+
+      .feature h3 { font-size: 15px; margin: 0 0 7px; }
+
+      .feature p {
+        font-size: 13px;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 35px;
+        align-items: start;
+      }
+
+      .prose h2 { font-size: 25px; letter-spacing: -.7px; margin: 0 0 14px; }
+      .prose h3 { font-size: 17px; margin: 24px 0 8px; }
+
+      .prose p, .prose li { font-size: 14px; color: #b8c8bd; }
+      .prose p { margin: 0 0 13px; }
+      .prose ul { padding-left: 20px; }
+
+      .formula {
+        background: #102019;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 15px;
+        margin: 14px 0;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12px;
+        color: var(--green);
+        overflow-wrap: anywhere;
+      }
+
+      .faq-list { border-top: 1px solid var(--border); }
+
+      details { border-bottom: 1px solid var(--border); padding: 18px 0; }
+
+      summary { cursor: pointer; font-size: 14px; font-weight: 750; }
+
+      details p { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
+
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 25px 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .footer-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        transform: translate(-50%, 20px);
+        opacity: 0;
+        pointer-events: none;
+        background: var(--green);
+        color: #10251a;
+        padding: 12px 18px;
+        border-radius: 11px;
+        font-weight: 800;
+        font-size: 13px;
+        box-shadow: 0 10px 35px #0006;
+        transition: .2s;
+        z-index: 10;
+        max-width: calc(100% - 24px);
+        text-align: center;
+      }
+
+      .toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+      @media (max-width: 820px) {
+        .calculator { grid-template-columns: 1fr; max-width: 560px; }
+        .hero { padding-top: 48px; }
+        .feature-grid { grid-template-columns: 1fr; }
+        .feature {
+          display: grid;
+          grid-template-columns: 39px 1fr;
+          column-gap: 13px;
+        }
+        .feature-icon { grid-row: span 2; margin: 0; }
+        .feature h3 { align-self: end; }
+        .feature p { grid-column: 2; }
+        .content-grid { grid-template-columns: 1fr; gap: 35px; }
+      }
+
+      @media (max-width: 480px) {
+        .wrap { width: min(100% - 24px, 1100px); }
+        .nav { min-height: 61px; }
+        .nav-note { font-size: 11px; }
+        .hero { padding: 40px 0 23px; }
+        h1 { letter-spacing: -1.8px; }
+        .hero p { font-size: 14px; }
+        .calculator { margin-top: 16px; margin-bottom: 45px; gap: 13px; }
+        .card-head { padding: 18px; }
+        .card-body { padding: 18px; }
+        .two-col { gap: 10px; }
+        .metrics { gap: 8px; }
+        .metric { padding: 11px; }
+        .metric strong { font-size: 15px; }
+        .button-row { grid-template-columns: 1fr; }
+        .section { padding-bottom: 45px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="wrap nav">
+        <a class="brand" href="#top" aria-label="CoinGain home">
+          <span class="brand-mark">C</span>
+          <span>CoinGain<span style="color:var(--green)">.</span></span>
+        </a>
+        <span class="nav-note">Free crypto calculator</span>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="wrap hero">
+        <span class="eyebrow">✳ Free tool · No sign-up</span>
+        <h1>Would your crypto<br />trade make you <span>money?</span></h1>
+        <p>
+          Calculate your crypto profit, trading fees, and return on investment.
+          Then see what your investment could be worth at a future price.
+        </p>
+        <div class="trust-row">
+          <span>Instant calculations</span>
+          <span>Fees included</span>
+          <span>Private by design</span>
+        </div>
+      </section>
+
+      <section class="wrap calculator" aria-label="Crypto profit calculator">
+        <div class="card">
+          <div class="card-head">
+            <h2>Enter your trade</h2>
+            <p>Change any value to update your results instantly.</p>
+          </div>
+
+          <div class="card-body">
+            <div class="field">
+              <div class="label-row">
+                <label for="asset">Crypto asset</label>
+                <span class="hint">Label only</span>
+              </div>
+              <select id="asset">
+                <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+                <option value="Ethereum (ETH)">Ethereum (ETH)</option>
+                <option value="Solana (SOL)">Solana (SOL)</option>
+                <option value="XRP">XRP</option>
+                <option value="Dogecoin (DOGE)">Dogecoin (DOGE)</option>
+                <option value="Other crypto">Other crypto</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <div class="label-row">
+                <label for="investment">Investment amount</label>
+                <span class="hint">USD</span>
+              </div>
+              <div class="input-wrap">
+                <span class="prefix">$</span>
+                <input class="has-prefix" id="investment" type="number" min="0" step="any" value="1000" inputmode="decimal" />
+              </div>
+            </div>
+
+            <div class="two-col">
+              <div class="field">
+                <div class="label-row"><label for="buy">Buy price</label></div>
+                <div class="input-wrap">
+                  <span class="prefix">$</span>
+                  <input class="has-prefix" id="buy" type="number" min="0.00000001" step="any" value="50000" inputmode="decimal" />
+                </div>
+              </div>
+              <div class="field">
+                <div class="label-row"><label for="sell">Sell price</label></div>
+                <div class="input-wrap">
+                  <span class="prefix">$</span>
+                  <input class="has-prefix" id="sell" type="number" min="0" step="any" value="65000" inputmode="decimal" />
+                </div>
+              </div>
+            </div>
+
+            <div class="subsection">
+              <div class="subsection-title">Trading fees</div>
+              <div class="two-col">
+                <div class="field">
+                  <div class="label-row">
+                    <label for="buyFee">Buy fee</label>
+                    <span class="hint">%</span>
+                  </div>
+                  <input id="buyFee" type="number" min="0" max="100" step="any" value="0.1" inputmode="decimal" />
+                </div>
+                <div class="field">
+                  <div class="label-row">
+                    <label for="sellFee">Sell fee</label>
+                    <span class="hint">%</span>
+                  </div>
+                  <input id="sellFee" type="number" min="0" max="100" step="any" value="0.1" inputmode="decimal" />
+                </div>
+              </div>
+              <p class="hint">Enter your exchange's fee rates. Slippage, taxes and network fees are not included.</p>
+            </div>
+
+            <button class="btn btn-ghost btn-full" id="reset" type="button">
+              ↺ Reset example
+            </button>
+          </div>
+        </div>
+
+        <div class="card results">
+          <div class="card-head">
+            <h2>Your results</h2>
+            <p id="resultAsset">Bitcoin (BTC) · hypothetical trade</p>
+          </div>
+
+          <div class="card-body">
+            <div class="result-label">Net profit / loss</div>
+            <div id="profit" class="profit-number positive" aria-live="polite">$297.70</div>
+            <div class="roi-line">Return on investment: <strong id="roi">29.77%</strong></div>
+            <span id="status" class="roi-pill">Profitable trade</span>
+
+            <div class="metrics">
+              <div class="metric">
+                <span>Total invested</span>
+                <strong id="totalCost">$1,001.00</strong>
+              </div>
+              <div class="metric">
+                <span>After-sale proceeds</span>
+                <strong id="proceeds">$1,298.70</strong>
+              </div>
+              <div class="metric">
+                <span>Crypto quantity</span>
+                <strong id="quantity">0.02 units</strong>
+              </div>
+              <div class="metric">
+                <span>Break-even sell price</span>
+                <strong id="breakeven">$50,150.15</strong>
+              </div>
+            </div>
+
+            <div class="result-divider"></div>
+            <div class="detail-row"><span>Buy fee</span><strong id="buyFeeMoney">$1.00</strong></div>
+            <div class="detail-row"><span>Sell fee</span><strong id="sellFeeMoney">$1.30</strong></div>
+            <div class="detail-row"><span>Price change</span><strong id="priceChange" class="positive">+30.00%</strong></div>
+
+            <button class="btn btn-primary btn-full" id="share" type="button">
+              ↗ Share my result
+            </button>
+            <div class="button-row">
+              <button class="btn btn-secondary" id="copy" type="button">Copy result</button>
+              <button class="btn btn-ghost" id="copyLink" type="button">Copy link</button>
+            </div>
+
+            <div class="subsection scenario">
+              <h3>What if the price goes higher?</h3>
+              <p>Test a hypothetical future price. This is a scenario, not a prediction.</p>
+              <div class="field">
+                <div class="label-row">
+                  <label for="target">Target price</label>
+                  <span class="hint">USD per coin</span>
+                </div>
+                <div class="input-wrap">
+                  <span class="prefix">$</span>
+                  <input class="has-prefix" id="target" type="number" min="0" step="any" value="100000" inputmode="decimal" />
+                </div>
+              </div>
+              <div class="scenario-result">
+                <small>Estimated profit at target price</small>
+                <div class="big positive" id="targetProfit">$997.20</div>
+                <small id="targetValue">Estimated portfolio value after sell fee: $1,998.00</small>
+              </div>
+            </div>
+
+            <p class="notice">
+              Calculations use your inputs, not live market prices. Results are estimates and exclude taxes, slippage and other costs not entered above.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="wrap section">
+        <div class="section-heading">
+          <h2>Everything you need to check a trade</h2>
+          <p>Simple numbers, transparent calculations, and no account required.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature">
+            <div class="feature-icon">↗</div>
+            <h3>Real profit after fees</h3>
+            <p>Account for your buy and sell fees to estimate what remains after a trade.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon">◎</div>
+            <h3>Know your break-even</h3>
+            <p>See the minimum sell price needed to recover your investment and trading fees.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon">⌁</div>
+            <h3>Explore price scenarios</h3>
+            <p>Test possible prices to understand how gains and losses change. No predictions or promises.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="wrap section">
+        <div class="content-grid">
+          <article class="prose">
+            <h2>How to calculate crypto profit</h2>
+            <p>
+              To estimate profit, start with the amount you invest and the price at which you buy.
+              Add the buy fee to find your total cost. Then calculate the value of the crypto at
+              your selling price and subtract the selling fee.
+            </p>
+
+            <h3>Crypto profit formula</h3>
+            <div class="formula">
+              Quantity = Investment ÷ Buy price<br /><br />
+              Total cost = Investment + Buy fee<br /><br />
+              Net proceeds = Quantity × Sell price − Sell fee<br /><br />
+              Net profit = Net proceeds − Total cost
+            </div>
+
+            <h3>How is crypto ROI calculated?</h3>
+            <p>Return on investment (ROI) shows profit or loss relative to your total cost, including the buy fee.</p>
+            <div class="formula">ROI (%) = Net profit ÷ Total cost × 100</div>
+
+            <h3>Example</h3>
+            <p>
+              Suppose you spend $1,000 buying Bitcoin at $50,000 per coin, with a 0.1% buy fee.
+              You receive 0.02 BTC before fees. If you sell at $65,000 and pay a 0.1% sell fee,
+              your estimated net profit is $297.70, with an ROI of approximately 29.77%.
+            </p>
+
+            <h3>What is a crypto break-even price?</h3>
+            <p>
+              Your break-even price is the selling price at which your after-fee proceeds equal
+              your total cost. Selling below this price results in a loss under the calculator's
+              assumptions; selling above it produces a profit.
+            </p>
+          </article>
+
+          <article class="prose">
+            <h2>Frequently asked questions</h2>
+            <div class="faq-list">
+              <details>
+                <summary>How much profit would I make if crypto goes up 10%?</summary>
+                <p>A 10% price increase does not always equal a 10% net return. Trading fees, your buy price, and your total cost affect your final return. Enter your trade details to calculate an estimate.</p>
+              </details>
+              <details>
+                <summary>Does this calculator use live crypto prices?</summary>
+                <p>No. You enter the buy price, sell price, and target price yourself. This lets you test historical or hypothetical scenarios without a live price feed.</p>
+              </details>
+              <details>
+                <summary>Are trading fees included?</summary>
+                <p>Yes. You can enter separate buy and sell fee percentages. Network fees, slippage, funding payments and taxes are not included.</p>
+              </details>
+              <details>
+                <summary>Can I calculate a loss as well as a profit?</summary>
+                <p>Yes. Enter a selling price below your buy price and the tool will calculate your estimated net loss and ROI.</p>
+              </details>
+              <details>
+                <summary>Does the calculator predict future prices?</summary>
+                <p>No. The target-price simulator calculates what your position might be worth at a price you choose. It does not predict whether that price will occur.</p>
+              </details>
+              <details>
+                <summary>Is this crypto profit calculator free?</summary>
+                <p>Yes. The calculator runs in your browser, requires no sign-up, and does not need a paid market-data API.</p>
+              </details>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap footer-row">
+        <span>© {year} CoinGain. Free crypto calculations.</span>
+        <span>For educational purposes only. Not financial advice.</span>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    
+<script>
+  type NumericField =
+    | "investment"
+    | "buy"
+    | "sell"
+    | "buyFee"
+    | "sellFee"
+    | "target";
+
+  type FieldId = "asset" | NumericField;
+
+  interface TradeResult {
+    asset: string;
+    investment: number;
+    buy: number;
+    sell: number;
+    target: number;
+    buyFeeRate: number;
+    sellFeeRate: number;
+    buyFee: number;
+    sellFee: number;
+    totalCost: number;
+    quantity: number;
+    proceeds: number;
+    profit: number;
+    roi: number;
+    breakEven: number;
+    priceChange: number;
+    targetProfit: number;
+    targetProceeds: number;
+  }
+
+  const $ = <T extends HTMLElement = HTMLElement>(id: string): T => {
+    const element = document.getElementById(id);
+
+    if (!element) {
+      throw new Error(`Required element not found: #${id}`);
+    }
+
+    return element as T;
+  };
+
+  const fields: FieldId[] = [
+    "asset",
+    "investment",
+    "buy",
+    "sell",
+    "buyFee",
+    "sellFee",
+    "target"
+  ];
+
+  const numericFields: NumericField[] = [
+    "investment",
+    "buy",
+    "sell",
+    "buyFee",
+    "sellFee",
+    "target"
+  ];
+
+  const money = (value: number): string => {
+    if (!Number.isFinite(value)) return "—";
+
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  };
+
+  const quantityFormat = (value: number): string => {
+    if (!Number.isFinite(value)) return "—";
+
+    return new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 10
+    }).format(value);
+  };
+
+  const percent = (value: number): string => {
+    if (!Number.isFinite(value)) return "—";
+
+    return `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
+  };
+
+  const numberValue = (id: NumericField): number => {
+    const element = $<HTMLInputElement>(id);
+    const raw = element.value.trim();
+
+    if (raw === "") return NaN;
+
+    return Number(raw);
+  };
+
+  const setText = (id: string, value: string): void => {
+    $(id).textContent = value;
+  };
+
+  const setTone = (id: string, value: number): void => {
+    const element = $(id);
+
+    element.classList.remove("positive", "negative");
+    element.classList.add(value < 0 ? "negative" : "positive");
+  };
+
+  let latest: TradeResult | null = null;
+  let toastTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function calculate(): void {
+    const investment = numberValue("investment");
+    const buy = numberValue("buy");
+    const sell = numberValue("sell");
+    const buyFeePercent = numberValue("buyFee");
+    const sellFeePercent = numberValue("sellFee");
+    const target = numberValue("target");
+    const asset = $<HTMLSelectElement>("asset").value;
+
+    const buyFeeRate = buyFeePercent / 100;
+    const sellFeeRate = sellFeePercent / 100;
+
+    const valid =
+      Number.isFinite(investment) &&
+      investment > 0 &&
+      Number.isFinite(buy) &&
+      buy > 0 &&
+      Number.isFinite(sell) &&
+      sell >= 0 &&
+      Number.isFinite(buyFeePercent) &&
+      buyFeePercent >= 0 &&
+      buyFeePercent <= 100 &&
+      Number.isFinite(sellFeePercent) &&
+      sellFeePercent >= 0 &&
+      sellFeePercent < 100 &&
+      Number.isFinite(target) &&
+      target >= 0;
+
+    for (const id of numericFields) {
+      const element = $<HTMLInputElement>(id);
+      const value = numberValue(id);
+
+      const invalid =
+        !Number.isFinite(value) ||
+        (id === "investment" && value <= 0) ||
+        (id === "buy" && value <= 0) ||
+        (id === "sell" && value < 0) ||
+        (id === "target" && value < 0) ||
+        ((id === "buyFee" || id === "sellFee") &&
+          (value < 0 || value > 100)) ||
+        (id === "sellFee" && value >= 100);
+
+      element.setAttribute("aria-invalid", String(invalid));
+    }
+
+    $("share").setAttribute("aria-disabled", String(!valid));
+    $<HTMLButtonElement>("share").disabled = !valid;
+    $<HTMLButtonElement>("copy").disabled = !valid;
+
+    if (!valid) {
+      setText("profit", "Check your inputs");
+      setText("roi", "—");
+      setText("status", "Enter valid values");
+
+      [
+        "totalCost",
+        "proceeds",
+        "quantity",
+        "breakeven",
+        "buyFeeMoney",
+        "sellFeeMoney",
+        "priceChange",
+        "targetProfit",
+        "targetValue"
+      ].forEach((id: string) => setText(id, "—"));
+
+      latest = null;
+      return;
+    }
+
+    /*
+     * The investment amount represents the actual amount spent
+     * on the asset, excluding the separately charged buy fee.
+     */
+    const buyFee = investment * buyFeeRate;
+    const totalCost = investment + buyFee;
+    const quantity = investment / buy;
+
+    const sellGross = quantity * sell;
+    const sellFee = sellGross * sellFeeRate;
+    const proceeds = sellGross - sellFee;
+
+    const profit = proceeds - totalCost;
+    const roi = (profit / totalCost) * 100;
+
+    const breakEven =
+      totalCost / (quantity * (1 - sellFeeRate));
+
+    const priceChange = ((sell - buy) / buy) * 100;
+
+    const targetGross = quantity * target;
+    const targetFee = targetGross * sellFeeRate;
+    const targetProceeds = targetGross - targetFee;
+    const targetProfit = targetProceeds - totalCost;
+
+    setText("resultAsset", `${asset} · hypothetical trade`);
+
+    setText(
+      "profit",
+      `${profit < 0 ? "−" : ""}${money(Math.abs(profit))}`
+    );
+    setTone("profit", profit);
+
+    setText("roi", percent(roi));
+
+    setText(
+      "status",
+      profit > 0
+        ? "Profitable trade"
+        : profit < 0
+          ? "Loss on this trade"
+          : "Break-even trade"
+    );
+
+    setText("totalCost", money(totalCost));
+    setText("proceeds", money(proceeds));
+    setText("quantity", `${quantityFormat(quantity)} units`);
+    setText("breakeven", money(breakEven));
+
+    setText("buyFeeMoney", money(buyFee));
+    setText("sellFeeMoney", money(sellFee));
+    setText("priceChange", percent(priceChange));
+    setTone("priceChange", priceChange);
+
+    setText(
+      "targetProfit",
+      `${targetProfit < 0 ? "−" : ""}${money(Math.abs(targetProfit))}`
+    );
+    setTone("targetProfit", targetProfit);
+
+    setText(
+      "targetValue",
+      `Estimated portfolio value after sell fee: ${money(targetProceeds)}`
+    );
+
+    latest = {
+      asset,
+      investment,
+      buy,
+      sell,
+      target,
+      buyFeeRate,
+      sellFeeRate,
+      buyFee,
+      sellFee,
+      totalCost,
+      quantity,
+      proceeds,
+      profit,
+      roi,
+      breakEven,
+      priceChange,
+      targetProfit,
+      targetProceeds
+    };
+  }
+
+  function summaryText(): string {
+    const result = latest;
+
+    if (!result) return "";
+
+    return [
+      `My ${result.asset} profit calculator result`,
+      `Investment: ${money(result.investment)}`,
+      `Buy price: ${money(result.buy)}`,
+      `Sell price: ${money(result.sell)}`,
+      `Estimated net ${result.profit < 0 ? "loss" : "profit"}: ${result.profit < 0 ? "−" : ""}${money(Math.abs(result.profit))}`,
+      `ROI: ${percent(result.roi)}`,
+      "",
+      "Calculate your own scenario with CoinGain."
+    ].join("\n");
+  }
+
+  function showToast(message: string): void {
+    const toast = $("toast");
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    if (toastTimer !== undefined) {
+      clearTimeout(toastTimer);
+    }
+
+    toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2200);
+  }
+
+  async function copyText(
+    text: string,
+    successMessage: string
+  ): Promise<void> {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        throw new Error("Clipboard API unavailable");
+      }
+
+      showToast(successMessage);
+    } catch {
+      const textarea = document.createElement("textarea");
+
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      textarea.style.top = "0";
+
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+
+      let copied = false;
+
+      try {
+        copied = document.execCommand("copy");
+      } catch {
+        copied = false;
+      }
+
+      textarea.remove();
+
+      showToast(
+        copied
+          ? successMessage
+          : "Copy failed. Please copy manually."
+      );
+    }
+  }
+
+  fields.forEach((id: FieldId) => {
+    const element = $(id);
+
+    element.addEventListener("input", calculate);
+    element.addEventListener("change", calculate);
+  });
+
+  $("reset").addEventListener("click", () => {
+    $<HTMLSelectElement>("asset").value = "Bitcoin (BTC)";
+    $<HTMLInputElement>("investment").value = "1000";
+    $<HTMLInputElement>("buy").value = "50000";
+    $<HTMLInputElement>("sell").value = "65000";
+    $<HTMLInputElement>("buyFee").value = "0.1";
+    $<HTMLInputElement>("sellFee").value = "0.1";
+    $<HTMLInputElement>("target").value = "100000";
+
+    calculate();
+    showToast("Example restored");
+  });
+
+  $("copy").addEventListener("click", () => {
+    if (latest) {
+      void copyText(summaryText(), "Result copied");
+    }
+  });
+
+  $("copyLink").addEventListener("click", () => {
+    void copyText(window.location.href, "Page link copied");
+  });
+
+  $("share").addEventListener("click", async () => {
+    if (!latest) return;
+
+    const text = summaryText();
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "My crypto calculation",
+          text,
+          url: window.location.href
+        });
+      } catch (error: unknown) {
+        if (
+          !(error instanceof DOMException && error.name === "AbortError")
+        ) {
+          await copyText(
+            `${text}\n${window.location.href}`,
+            "Share text copied"
+          );
+        }
+      }
+    } else {
+      await copyText(
+        `${text}\n${window.location.href}`,
+        "Share text copied"
+      );
+    }
+  });
+
+  calculate();
+</script>
+
+  </body>
+</html>
